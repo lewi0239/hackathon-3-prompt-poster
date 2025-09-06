@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import {
     NavigationMenu,
@@ -6,6 +7,7 @@ import {
     NavigationMenuList,
     navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+
 
 export default function Home() {
     return (
@@ -63,6 +65,7 @@ export default function Home() {
                             placeholder="e.g., retro sci-fi cityscape in neon dusk"
                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none"
                         />
+
                         <button
                             type="button"
                             className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors"
@@ -122,6 +125,7 @@ export default function Home() {
                         <Link href="#">Terms</Link>
                         <Link href="#">Contact</Link>
                     </div>
+
                 </div>
             </footer>
         </div>
