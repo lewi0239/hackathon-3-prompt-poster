@@ -11,12 +11,41 @@ import { Button } from "@/components/ui/button";
 import { CartItem } from "@/components/layout/CartItem";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { loadStripe } from "@stripe/stripe-js";
+
+const stripePromise = loadStripe(
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+);
 
 export default function CartDialog() {
     const { cartItems, clearCart } = useCart();
 
-    const handleCheckout = () => {
-        console.log("Checkout clicked");
+    const handleCheckout = async () => {
+        const stripe = await stripePromise;
+
+        const res = await fetch("/api/checkout", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                cartItems,
+            }),
+        });
+
+        const data = await res.json();
+
+        if (data.id && stripe) {
+            const result = await stripe.redirectToCheckout({
+                sessionId: data.id,
+            });
+
+            if (result.error) {
+                console.error(result.error.message);
+            }
+        } else {
+            console.error("Stripe session creation failed", data.error);
+        }
     };
 
     const isEmpty = cartItems.length === 0;
