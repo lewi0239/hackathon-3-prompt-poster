@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Pencil, Trash2 } from "lucide-react";
+import { CartItem } from "@/components/layout/CartItem";
 
 export default function CartDialog() {
     return (
@@ -27,44 +28,15 @@ export default function CartDialog() {
                 {/* Cart Items */}
                 <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-1">
                     {[1, 2, 3].map((i) => (
-                        <Card key={i} className="p-4 relative flex-row gap-6">
-                            {/* Image */}
-                            <div className="relative w-28 h-40">
-                                <Image
-                                    src={"/next.svg"}
-                                    alt={`Meme ${i}`}
-                                    fill
-                                    className="object-cover rounded"
-                                    sizes="(max-width: 768px) 100vw, 200px"
-                                    priority
-                                />
-                            </div>
-
-                            {/* Info Section */}
-                            <div className="flex flex-col justify-between flex-1">
-                                <div>
-                                    <h2 className="text-lg font-semibold">
-                                        Meme Poster #1
-                                    </h2>
-                                    <p className="text-sm text-muted-foreground mt-1">
-                                        Qty 1 • Matte • M 45 × 32cm
-                                    </p>
-                                    <button className="flex items-center text-sm text-blue-600 mt-2 hover:underline">
-                                        <Pencil className="w-4 h-4 mr-1" />
-                                        Edit
-                                    </button>
-                                </div>
-
-                                <p className="text-lg font-semibold mt-4">
-                                    $54.99
-                                </p>
-                            </div>
-
-                            {/* Trash Icon */}
-                            <button className="absolute top-4 right-4 text-muted-foreground hover:text-destructive transition">
-                                <Trash2 className="w-5 h-5" />
-                            </button>
-                        </Card>
+                        <CartItem
+                            key={i}
+                            imageSrc="/next.svg"
+                            posterName={`Meme Poster #${i}`}
+                            quantity={1}
+                            finish="Matte"
+                            dimensions="M 45 × 32cm"
+                            price={54.99}
+                        />
                     ))}
                 </div>
 
