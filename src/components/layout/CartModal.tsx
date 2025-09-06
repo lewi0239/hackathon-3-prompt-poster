@@ -17,7 +17,7 @@ const stripePromise = loadStripe(
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
 );
 
-export default function CartDialog() {
+export default function CartDialog({ defaultOpen = false }) {
     const { cartItems, clearCart } = useCart();
 
     const handleCheckout = async () => {
@@ -51,7 +51,7 @@ export default function CartDialog() {
     const isEmpty = cartItems.length === 0;
 
     return (
-        <Dialog>
+        <Dialog defaultOpen={defaultOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline">View Cart</Button>
             </DialogTrigger>

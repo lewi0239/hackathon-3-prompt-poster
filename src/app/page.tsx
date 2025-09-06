@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
     NavigationMenu,
     NavigationMenuItem,
@@ -9,6 +12,9 @@ import {
 import CartModal from "@/components/layout/CartModal";
 
 export default function Home() {
+    const searchParams = useSearchParams();
+    const cartOpen = searchParams.get("cart") === "open";
+
     return (
         <div className="font-sans min-h-screen flex flex-col">
             {/* Navbar */}
@@ -39,7 +45,7 @@ export default function Home() {
                             </NavigationMenuItem>
 
                             <NavigationMenuItem>
-                                <CartModal />
+                                <CartModal defaultOpen={cartOpen} />
                             </NavigationMenuItem>
                         </NavigationMenuList>
                     </NavigationMenu>
