@@ -9,53 +9,49 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CartItem } from "@/components/layout/CartItem";
-import { useState } from "react";
 import { ShoppingCart } from "lucide-react";
+import { useCart } from "@/context/CartContext";
+import { loadStripe } from "@stripe/stripe-js";
 
-export default function CartDialog() {
-    const [cartItems, setCartItems] = useState([
-        {
-            id: "1",
-            imageSrc: "/next.svg",
-            posterName: "Meme Poster #1",
-            quantity: 1,
-            finish: "Glossy",
-            dimensions: "M 45 × 32cm",
-            price: 54.99,
-        },
-        {
-            id: "2",
-            imageSrc: "/next.svg",
-            posterName: "Elden Ring Art",
-            quantity: 2,
-            finish: "Matte",
-            dimensions: "L 60 × 40cm",
-            price: 74.99,
-        },
-        {
-            id: "3",
-            imageSrc: "/next.svg",
-            posterName: "Anime Collage",
-            quantity: 1,
-            finish: "Matte",
-            dimensions: "S 30 × 20cm",
-            price: 39.99,
-        },
-    ]);
+const stripePromise = loadStripe(
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+);
 
-    const handleClearCart = () => {
-        setCartItems([]);
-        console.log("Cart cleared!");
-    };
+export default function CartDialog({ defaultOpen = false }) {
+    const { cartItems, clearCart } = useCart();
 
-    const handleCheckout = () => {
-        console.log("Checkout clicked");
+    const handleCheckout = async () => {
+        const stripe = await stripePromise;
+
+        const res = await fetch("/api/checkout", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                cartItems,
+            }),
+        });
+
+        const data = await res.json();
+
+        if (data.id && stripe) {
+            const result = await stripe.redirectToCheckout({
+                sessionId: data.id,
+            });
+
+            if (result.error) {
+                console.error(result.error.message);
+            }
+        } else {
+            console.error("Stripe session creation failed", data.error);
+        }
     };
 
     const isEmpty = cartItems.length === 0;
 
     return (
-        <Dialog>
+        <Dialog defaultOpen={defaultOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline">View Cart</Button>
             </DialogTrigger>
@@ -79,6 +75,7 @@ export default function CartDialog() {
                             {cartItems.map((item) => (
                                 <CartItem
                                     key={item.id}
+                                    id={item.id}
                                     imageSrc={item.imageSrc}
                                     posterName={item.posterName}
                                     quantity={item.quantity}
@@ -112,10 +109,7 @@ export default function CartDialog() {
                                     .toFixed(2)}
                             </p>
                             <div className="flex gap-4 justify-end mt-4">
-                                <Button
-                                    variant="outline"
-                                    onClick={handleClearCart}
-                                >
+                                <Button variant="outline" onClick={clearCart}>
                                     Clear Cart
                                 </Button>
                                 <Button onClick={handleCheckout}>

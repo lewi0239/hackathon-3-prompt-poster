@@ -3,8 +3,10 @@
 import Image from "next/image";
 import { Pencil, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useCart } from "@/context/CartContext";
 
 type CartItemProps = {
+    id: string;
     imageSrc: string;
     posterName: string;
     quantity: number;
@@ -14,6 +16,7 @@ type CartItemProps = {
 };
 
 export function CartItem({
+    id,
     imageSrc,
     posterName,
     quantity,
@@ -21,6 +24,8 @@ export function CartItem({
     dimensions,
     price,
 }: CartItemProps) {
+    const { removeFromCart } = useCart();
+
     return (
         <Card className="p-4 relative flex-row gap-6">
             {/* Image */}
@@ -54,7 +59,10 @@ export function CartItem({
             </div>
 
             {/* Trash Icon */}
-            <button className="absolute top-4 right-4 text-muted-foreground hover:text-destructive transition">
+            <button
+                className="absolute top-4 right-4 text-muted-foreground hover:text-destructive transition"
+                onClick={() => removeFromCart(id)}
+            >
                 <Trash2 className="w-5 h-5" />
             </button>
         </Card>
