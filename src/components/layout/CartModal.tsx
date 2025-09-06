@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import {
     Dialog,
     DialogContent,
@@ -9,11 +8,39 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Pencil, Trash2 } from "lucide-react";
 import { CartItem } from "@/components/layout/CartItem";
 
 export default function CartDialog() {
+    const cartItems = [
+        {
+            id: "1",
+            imageSrc: "/next.svg",
+            posterName: "Meme Poster #1",
+            quantity: 1,
+            finish: "Glossy",
+            dimensions: "M 45 × 32cm",
+            price: 54.99,
+        },
+        {
+            id: "2",
+            imageSrc: "/next.svg",
+            posterName: "Elden Ring Art",
+            quantity: 2,
+            finish: "Matte",
+            dimensions: "L 60 × 40cm",
+            price: 74.99,
+        },
+        {
+            id: "3",
+            imageSrc: "/next.svg",
+            posterName: "Anime Collage",
+            quantity: 1,
+            finish: "Matte",
+            dimensions: "S 30 × 20cm",
+            price: 39.99,
+        },
+    ];
+
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -27,23 +54,39 @@ export default function CartDialog() {
 
                 {/* Cart Items */}
                 <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-1">
-                    {[1, 2, 3].map((i) => (
+                    {cartItems.map((item) => (
                         <CartItem
-                            key={i}
-                            imageSrc="/next.svg"
-                            posterName={`Meme Poster #${i}`}
-                            quantity={1}
-                            finish="Matte"
-                            dimensions="M 45 × 32cm"
-                            price={54.99}
+                            key={item.id}
+                            imageSrc={item.imageSrc}
+                            posterName={item.posterName}
+                            quantity={item.quantity}
+                            finish={item.finish}
+                            dimensions={item.dimensions}
+                            price={item.price}
                         />
                     ))}
                 </div>
 
                 {/* Subtotal + Total */}
                 <div className="text-right mt-6 space-y-2">
-                    <p className="text-base">Subtotal: $164.97</p>
-                    <p className="text-lg font-semibold">Total: $164.97</p>
+                    <p className="text-base">
+                        Subtotal: $
+                        {cartItems
+                            .reduce(
+                                (sum, item) => sum + item.price * item.quantity,
+                                0,
+                            )
+                            .toFixed(2)}
+                    </p>
+                    <p className="text-lg font-semibold">
+                        Total: $
+                        {cartItems
+                            .reduce(
+                                (sum, item) => sum + item.price * item.quantity,
+                                0,
+                            )
+                            .toFixed(2)}
+                    </p>
                     <div className="flex gap-4 justify-end mt-4">
                         <Button variant="outline">Clear Cart</Button>
                         <Button>Checkout</Button>
