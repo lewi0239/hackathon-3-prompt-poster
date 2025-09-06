@@ -1,4 +1,6 @@
+"use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
     NavigationMenu,
@@ -8,14 +10,43 @@ import {
     navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 
-
 export default function Home() {
+    const [prompt, setPrompt] = useState("");
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState<string | null>(null);
+
+    async function handleGenerate(e: React.FormEvent) {
+        e.preventDefault();
+        if (!prompt.trim()) return;
+        setLoading(true);
+        setErr(null);
+        setImageUrl(null);
+
+        try {
+            const res = await fetch("/api/llm", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.error || "Failed to generate");
+            setImageUrl(data.url as string); // your API returns { url: "/api/preview/:id" }
+        } catch (e: any) {
+            setErr(e.message || "Something went wrong");
+        } finally {
+            setLoading(false);
+        }
+    }
+
     return (
         <div className="font-sans min-h-screen flex flex-col">
             {/* Navbar */}
             <nav className="w-full border-b">
                 <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between">
-                    <Link href="/" className="font-semibold tracking-tight">AI-to-Print</Link>
+                    <Link href="/" className="font-semibold tracking-tight">
+                        AI-to-Print
+                    </Link>
 
                     <NavigationMenu>
                         <NavigationMenuList>
@@ -35,7 +66,6 @@ export default function Home() {
                                 <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
                                     <Link href="/checkout" className="relative inline-flex">
                                         Cart
-                                        {/* static badge overlapping the “t” */}
                                         <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
                                             0
                                         </span>
@@ -57,29 +87,37 @@ export default function Home() {
                         Type a prompt. We generate the art. Pick a size and print.
                     </p>
 
-                    {/* static input + button (no logic) */}
-                    <div className="flex gap-2">
+                    <form onSubmit={handleGenerate} className="flex gap-2">
                         <input
                             id="prompt"
                             type="text"
                             placeholder="e.g., retro sci-fi cityscape in neon dusk"
+                            value={prompt}
+                            onChange={(e) => setPrompt(e.target.value)}
                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none"
                         />
-
                         <button
-                            type="button"
-                            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors"
+                            type="submit"
+                            disabled={loading || !prompt.trim()}
+                            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors disabled:opacity-50"
                         >
-                            Generate
+                            {loading ? "Generating..." : "Generate"}
                         </button>
-                    </div>
+                    </form>
+
+                    {err && <p className="text-sm text-red-600">{err}</p>}
                 </div>
 
-                {/* Preview placeholder */}
+                {/* Preview */}
                 <div className="border rounded-md overflow-hidden aspect-[4/3] bg-muted grid place-items-center">
-                    <div className="text-muted-foreground text-sm">
-                        Your generated poster will appear here.
-                    </div>
+                    {imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={imageUrl} alt="Generated poster" className="h-full w-full object-cover" />
+                    ) : (
+                        <div className="text-muted-foreground text-sm">
+                            Your generated poster will appear here.
+                        </div>
+                    )}
                 </div>
             </header>
 
@@ -125,7 +163,6 @@ export default function Home() {
                         <Link href="#">Terms</Link>
                         <Link href="#">Contact</Link>
                     </div>
-
                 </div>
             </footer>
         </div>
