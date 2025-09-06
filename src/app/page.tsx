@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -12,9 +13,12 @@ import {
 import CartModal from "@/components/layout/CartModal";
 import { toast } from "sonner";
 
-import { useEffect } from "react";
-
 export default function Home() {
+    const [prompt, setPrompt] = useState("");
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState<string | null>(null);
+
     const router = useRouter();
     const searchParams = useSearchParams();
     const cartOpen = searchParams.get("cart") === "open";
@@ -33,6 +37,29 @@ export default function Home() {
             router.replace(`/?${newParams.toString()}`, { scroll: false });
         }
     }, [success, searchParams, router]);
+
+    async function handleGenerate(e: React.FormEvent) {
+        e.preventDefault();
+        if (!prompt.trim()) return;
+        setLoading(true);
+        setErr(null);
+        setImageUrl(null);
+
+        try {
+            const res = await fetch("/api/llm", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.error || "Failed to generate");
+            setImageUrl(data.url as string); // your API returns { url: "/api/preview/:id" }
+        } catch (e: any) {
+            setErr(e.message || "Something went wrong");
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <div className="font-sans min-h-screen flex flex-col">
@@ -82,29 +109,37 @@ export default function Home() {
                         print.
                     </p>
 
-                    {/* static input + button (no logic) */}
-                    <div className="flex gap-2">
+                    <form onSubmit={handleGenerate} className="flex gap-2">
                         <input
                             id="prompt"
                             type="text"
                             placeholder="e.g., retro sci-fi cityscape in neon dusk"
+                            value={prompt}
+                            onChange={(e) => setPrompt(e.target.value)}
                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none"
                         />
-
                         <button
-                            type="button"
-                            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors"
+                            type="submit"
+                            disabled={loading || !prompt.trim()}
+                            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors disabled:opacity-50"
                         >
-                            Generate
+                            {loading ? "Generating..." : "Generate"}
                         </button>
-                    </div>
+                    </form>
+
+                    {err && <p className="text-sm text-red-600">{err}</p>}
                 </div>
 
-                {/* Preview placeholder */}
+                {/* Preview */}
                 <div className="border rounded-md overflow-hidden aspect-[4/3] bg-muted grid place-items-center">
-                    <div className="text-muted-foreground text-sm">
-                        Your generated poster will appear here.
-                    </div>
+                    {imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={imageUrl} alt="Generated poster" className="h-full w-full object-cover" />
+                    ) : (
+                        <div className="text-muted-foreground text-sm">
+                            Your generated poster will appear here.
+                        </div>
+                    )}
                 </div>
             </header>
 
