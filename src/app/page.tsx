@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
     NavigationMenu,
     NavigationMenuItem,
@@ -9,12 +10,33 @@ import {
     NavigationMenuList,
     navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import CartModal from "@/components/layout/CartModal";
+import { toast } from "sonner";
 
 export default function Home() {
     const [prompt, setPrompt] = useState("");
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState<string | null>(null);
+
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const cartOpen = searchParams.get("cart") === "open";
+    const success = searchParams.get("success") === "true";
+
+    useEffect(() => {
+        if (success) {
+            toast.success("Payment successful!", {
+                description: "Your order has been placed 🎉",
+            });
+
+            // Clean the URL after showing the toast
+            const newParams = new URLSearchParams(searchParams.toString());
+            newParams.delete("success");
+
+            router.replace(`/?${newParams.toString()}`, { scroll: false });
+        }
+    }, [success, searchParams, router]);
 
     async function handleGenerate(e: React.FormEvent) {
         e.preventDefault();
@@ -51,26 +73,25 @@ export default function Home() {
                     <NavigationMenu>
                         <NavigationMenuList>
                             <NavigationMenuItem>
-                                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                                <NavigationMenuLink
+                                    asChild
+                                    className={navigationMenuTriggerStyle()}
+                                >
                                     <Link href="/">Home</Link>
                                 </NavigationMenuLink>
                             </NavigationMenuItem>
 
                             <NavigationMenuItem>
-                                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                                <NavigationMenuLink
+                                    asChild
+                                    className={navigationMenuTriggerStyle()}
+                                >
                                     <Link href="/about">About</Link>
                                 </NavigationMenuLink>
                             </NavigationMenuItem>
 
                             <NavigationMenuItem>
-                                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                                    <Link href="/checkout" className="relative inline-flex">
-                                        Cart
-                                        <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                                            0
-                                        </span>
-                                    </Link>
-                                </NavigationMenuLink>
+                                <CartModal defaultOpen={cartOpen} />
                             </NavigationMenuItem>
                         </NavigationMenuList>
                     </NavigationMenu>
@@ -84,7 +105,8 @@ export default function Home() {
                         Turn any idea into a poster — instantly.
                     </h1>
                     <p className="text-muted-foreground">
-                        Type a prompt. We generate the art. Pick a size and print.
+                        Type a prompt. We generate the art. Pick a size and
+                        print.
                     </p>
 
                     <form onSubmit={handleGenerate} className="flex gap-2">
@@ -127,27 +149,42 @@ export default function Home() {
                 <div className="grid gap-4 sm:grid-cols-3">
                     <div className="border rounded-md p-4 flex flex-col">
                         <div className="text-lg font-medium">12×18</div>
-                        <div className="text-muted-foreground mb-4">Matte or Glossy</div>
+                        <div className="text-muted-foreground mb-4">
+                            Matte or Glossy
+                        </div>
                         <div className="text-2xl font-bold mb-4">$24.99</div>
-                        <button type="button" className="mt-auto rounded-md border px-3 py-2 text-sm">
+                        <button
+                            type="button"
+                            className="mt-auto rounded-md border px-3 py-2 text-sm"
+                        >
                             Add to Cart
                         </button>
                     </div>
 
                     <div className="border rounded-md p-4 flex flex-col">
                         <div className="text-lg font-medium">18×24</div>
-                        <div className="text-muted-foreground mb-4">Matte or Glossy</div>
+                        <div className="text-muted-foreground mb-4">
+                            Matte or Glossy
+                        </div>
                         <div className="text-2xl font-bold mb-4">$39.99</div>
-                        <button type="button" className="mt-auto rounded-md border px-3 py-2 text-sm">
+                        <button
+                            type="button"
+                            className="mt-auto rounded-md border px-3 py-2 text-sm"
+                        >
                             Add to Cart
                         </button>
                     </div>
 
                     <div className="border rounded-md p-4 flex flex-col">
                         <div className="text-lg font-medium">24×36</div>
-                        <div className="text-muted-foreground mb-4">Matte or Glossy</div>
+                        <div className="text-muted-foreground mb-4">
+                            Matte or Glossy
+                        </div>
                         <div className="text-2xl font-bold mb-4">$59.99</div>
-                        <button type="button" className="mt-auto rounded-md border px-3 py-2 text-sm">
+                        <button
+                            type="button"
+                            className="mt-auto rounded-md border px-3 py-2 text-sm"
+                        >
                             Add to Cart
                         </button>
                     </div>
