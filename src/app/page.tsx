@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
     NavigationMenu,
     NavigationMenuItem,
@@ -10,10 +10,29 @@ import {
     navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import CartModal from "@/components/layout/CartModal";
+import { toast } from "sonner";
+
+import { useEffect } from "react";
 
 export default function Home() {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const cartOpen = searchParams.get("cart") === "open";
+    const success = searchParams.get("success") === "true";
+
+    useEffect(() => {
+        if (success) {
+            toast.success("Payment successful!", {
+                description: "Your order has been placed 🎉",
+            });
+
+            // Clean the URL after showing the toast
+            const newParams = new URLSearchParams(searchParams.toString());
+            newParams.delete("success");
+
+            router.replace(`/?${newParams.toString()}`, { scroll: false });
+        }
+    }, [success, searchParams, router]);
 
     return (
         <div className="font-sans min-h-screen flex flex-col">
