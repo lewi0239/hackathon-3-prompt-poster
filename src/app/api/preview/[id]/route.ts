@@ -3,9 +3,12 @@ import { readPreview } from "@/lib/preview-store";
 // Optional: prevent static optimization/caching
 export const dynamic = "force-dynamic";
 
-export async function GET(_: Request, { params }: { params: { id: string } }) {
-    const { id } = params;
-    const rec = await readPreview(id);
+export async function GET(
+    _: Request,
+    context: { params: Promise<{ id: string }> },
+) {
+    const { id } = await context.params;
+    const rec = readPreview(id);
 
     if (!rec) return new Response("Not found", { status: 404 });
 

@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/navigation-menu";
 import CartModal from "@/components/layout/CartModal";
 import { toast } from "sonner";
+import { Suspense } from "react";
+import SearchParamEffects from "@/components/layout/SearchParamsEffects"; // adjust path if needed
 
 export default function Home() {
     const [prompt, setPrompt] = useState("");
@@ -63,6 +65,10 @@ export default function Home() {
 
     return (
         <div className="font-sans min-h-screen flex flex-col">
+            <Suspense>
+                <SearchParamEffects />
+            </Suspense>
+
             {/* Navbar */}
             <nav className="w-full border-b">
                 <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between">
