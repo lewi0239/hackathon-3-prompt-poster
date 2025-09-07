@@ -54,8 +54,8 @@ export default function Home() {
             const data = await res.json();
             if (!res.ok) throw new Error(data?.error || "Failed to generate");
             setImageUrl(data.url as string); // your API returns { url: "/api/preview/:id" }
-        } catch (e: any) {
-            setErr(e.message || "Something went wrong");
+        } catch (e: unknown) {
+            if (e instanceof Error) setErr(e.message || "Something went wrong");
         } finally {
             setLoading(false);
         }
@@ -134,7 +134,11 @@ export default function Home() {
                 <div className="border rounded-md overflow-hidden aspect-[4/3] bg-muted grid place-items-center">
                     {imageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={imageUrl} alt="Generated poster" className="h-full w-full object-cover" />
+                        <img
+                            src={imageUrl}
+                            alt="Generated poster"
+                            className="h-full w-full object-cover"
+                        />
                     ) : (
                         <div className="text-muted-foreground text-sm">
                             Your generated poster will appear here.
